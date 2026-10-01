@@ -1,144 +1,98 @@
-import json
-import requests
 import streamlit as st
+from memory import (
+    add_knowledge,
+    find_knowledge,
+    add_structured_knowledge,
+    find_structured_knowledge
+)
 
 
-GITHUB_REPO = "liliya111darky/my-ai"
-FILE_PATH = "memory.json"
-BRANCH = "main"
+st.set_page_config(
+    page_title="My AI",
+    page_icon="🧠",
+)
+
+st.title("🧠 My AI")
+st.write("Мой собственный искусственный интеллект")
+
+st.divider()
+
+st.subheader("📚 Память")
+
+subject = st.text_input("Тема")
+fact = st.text_area("Что должен запомнить ИИ?")
+
+if st.button("💾 Запомнить"):
+    if subject and fact:
+        add_knowledge(subject, fact)
+        st.success("Знание сохранено в памяти!")
+    else:
+        st.warning("Заполни тему и знание.")
 
 
-def get_github_url():
-    return f"https://api.github.com/repos/{GITHUB_REPO}/contents/{FILE_PATH}"
+st.divider()
+
+st.subheader("🧩 Структурированное знание")
+
+structured_subject = st.text_input("Объект")
+structured_property = st.text_input("Свойство")
+structured_value = st.text_input("Значение")
+
+structured_confidence = st.slider(
+    "Уверенность",
+    min_value=0.0,
+    max_value=1.0,
+    value=1.0,
+    step=0.1
+)
+
+if st.button("🧠 Сохранить структурированное знание"):
+    if structured_subject and structured_property and structured_value:
+        add_structured_knowledge(
+            structured_subject,
+            structured_property,
+            structured_value,
+            structured_confidence
+        )
+        st.success("Структурированное знание сохранено!")
+    else:
+        st.warning("Заполни объект, свойство и значение.")
 
 
-def get_headers():
-    return {
-        "Authorization": f"Bearer {st.secrets['GITHUB_TOKEN']}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
+st.divider()
 
+st.subheader("🔎 Поиск в памяти")
 
-def load_memory():
-    response = requests.get(
-        get_github_url(),
-        headers=get_headers(),
-        params={"ref": BRANCH},
-    )
+search_subject = st.text_input("Что найти в памяти?")
 
-    if response.status_code == 404:
-        return {"knowledge": []}
+if st.button("🔍 Найти"):
+    if search_subject:
+        results = find_knowledge(search_subject)
+        structured_results = find_structured_knowledge(search_subject)
 
-    response.raise_for_status()
+        if results:
+            for item in results:
+                if "fact" in item:
+                    st.write(
+                        f"**{item['subject']}** — {item['fact']}"
+                    )
+                else:
+                    st.write(
+                        f"**{item['subject']}** — "
+                        f"{item['property']}: {item['value']} "
+                        f"(уверенность: {item['confidence']})"
+                    )
 
-    data = response.json()
+        if structured_results:
+            for item in structured_results:
+                st.write(
+                    f"**{item['subject']}** → "
+                    f"{item['property']} → "
+                    f"{item['value']} "
+                    f"(уверенность: {item['confidence']})"
+                )
 
-    content = data["content"]
-    content = content.replace("\n", "")
-
-    import base64
-
-    decoded = base64.b64decode(content).decode("utf-8")
-
-    return json.loads(decoded)
-
-
-def save_memory(memory):
-    import base64
-
-    url = get_github_url()
-
-    # Получаем текущий SHA файла
-    response = requests.get(
-        url,
-        headers=get_headers(),
-        params={"ref": BRANCH},
-    )
-
-    response.raise_for_status()
-
-    file_data = response.json()
-    sha = file_data["sha"]
-
-    content = json.dumps(
-        memory,
-        ensure_ascii=False,
-        indent=2
-    )
-
-    encoded_content = base64.b64encode(
-        content.encode("utf-8")
-    ).decode("utf-8")
-
-    payload = {
-        "message": "Update AI memory",
-        "content": encoded_content,
-        "branch": BRANCH,
-        "sha": sha,
-    }
-
-    response = requests.put(
-        url,
-        headers=get_headers(),
-        json=payload,
-    )
-
-    response.raise_for_status()
-
-
-def add_knowledge(subject, fact):
-    memory = load_memory()
-
-    memory["knowledge"].append({
-        "subject": subject,
-        "fact": fact
-    })
-
-    save_memory(memory)
-
-
-def find_knowledge(subject):
-    memory = load_memory()
-
-    results = []
-
-    for item in memory["knowledge"]:
-        if item["subject"].lower() == subject.lower():
-            results.append(item)
-
-    return results
-
-def add_structured_knowledge(
-    subject,
-    property,
-    value,
-    confidence=1.0,
-    source="user"
-):
-    memory = load_memory()
-
-    memory["knowledge"].append({
-        "subject": subject,
-        "property": property,
-        "value": value,
-        "confidence": confidence,
-        "source": source
-    })
-
-    save_memory(memory)
-
-def find_structured_knowledge(subject):
-    memory = load_memory()
-
-    results = []
-
-    for item in memory["knowledge"]:
-        if (
-            item.get("subject", "").lower() == subject.lower()
-            and "property" in item
-            and "value" in item
-        ):
-            results.append(item)
-
-    return results
+        if not results and not structured_results:
+            st.info("Я пока ничего не знаю об этом.")
+    else:
+        st.warning("Напиши тему для поиска.")
