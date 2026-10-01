@@ -76,12 +76,6 @@ if st.button("🔍 Найти"):
                     st.write(
                         f"**{item['subject']}** — {item['fact']}"
                     )
-                else:
-                    st.write(
-                        f"**{item['subject']}** — "
-                        f"{item['property']}: {item['value']} "
-                        f"(уверенность: {item['confidence']})"
-                    )
 
         if structured_results:
             for item in structured_results:
