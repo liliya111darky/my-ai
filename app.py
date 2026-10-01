@@ -1,5 +1,10 @@
 import streamlit as st
-from memory import add_knowledge, find_knowledge, add_structured_knowledge
+from memory import (
+    add_knowledge,
+    find_knowledge,
+    add_structured_knowledge,
+    find_structured_knowledge
+)
 
 
 st.set_page_config(
@@ -63,6 +68,7 @@ search_subject = st.text_input("Что найти в памяти?")
 if st.button("🔍 Найти"):
     if search_subject:
         results = find_knowledge(search_subject)
+        structured_results = find_structured_knowledge(search_subject)
 
         if results:
             for item in results:
@@ -76,7 +82,17 @@ if st.button("🔍 Найти"):
                         f"{item['property']}: {item['value']} "
                         f"(уверенность: {item['confidence']})"
                     )
-        else:
+
+        if structured_results:
+            for item in structured_results:
+                st.write(
+                    f"**{item['subject']}** → "
+                    f"{item['property']} → "
+                    f"{item['value']} "
+                    f"(уверенность: {item['confidence']})"
+                )
+
+        if not results and not structured_results:
             st.info("Я пока ничего не знаю об этом.")
     else:
         st.warning("Напиши тему для поиска.")
