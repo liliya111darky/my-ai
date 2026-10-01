@@ -1,5 +1,5 @@
 import streamlit as st
-from memory import add_knowledge, find_knowledge
+from memory import add_knowledge, find_knowledge, add_structured_knowledge
 
 
 st.set_page_config(
