@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 from memory import add_knowledge, find_knowledge, add_structured_knowledge
 
@@ -81,4 +80,3 @@ if st.button("🔍 Найти"):
             st.info("Я пока ничего не знаю об этом.")
     else:
         st.warning("Напиши тему для поиска.")
-```
