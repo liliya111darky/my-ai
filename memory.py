@@ -127,3 +127,18 @@ def add_structured_knowledge(
     })
 
     save_memory(memory)
+
+def find_structured_knowledge(subject):
+    memory = load_memory()
+
+    results = []
+
+    for item in memory["knowledge"]:
+        if (
+            item.get("subject", "").lower() == subject.lower()
+            and "property" in item
+            and "value" in item
+        ):
+            results.append(item)
+
+    return results
