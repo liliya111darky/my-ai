@@ -5,7 +5,8 @@ from memory import (
     add_structured_knowledge,
     find_structured_knowledge,
     add_relation,
-    find_relations
+    find_relations,
+    find_contradictions
 )
 
 
@@ -50,13 +51,39 @@ structured_confidence = st.slider(
 
 if st.button("🧠 Сохранить структурированное знание"):
     if structured_subject and structured_property and structured_value:
-        add_structured_knowledge(
+
+        contradictions = find_contradictions(
             structured_subject,
             structured_property,
-            structured_value,
-            structured_confidence
+            structured_value
         )
-        st.success("Структурированное знание сохранено!")
+
+        if contradictions:
+            st.warning("⚠️ Обнаружено противоречие!")
+
+            for item in contradictions:
+                st.write(
+                    f"В памяти уже есть: "
+                    f"**{item['subject']}** → "
+                    f"{item['property']} → "
+                    f"{item['value']} "
+                    f"(уверенность: {item['confidence']})"
+                )
+
+            st.info(
+                "Новое знание не сохранено, "
+                "потому что оно противоречит существующему."
+            )
+
+        else:
+            add_structured_knowledge(
+                structured_subject,
+                structured_property,
+                structured_value,
+                structured_confidence
+            )
+            st.success("Структурированное знание сохранено!")
+
     else:
         st.warning("Заполни объект, свойство и значение.")
 
