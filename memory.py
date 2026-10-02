@@ -143,3 +143,23 @@ def find_structured_knowledge(subject):
             results.append(item)
 
     return results
+
+
+def add_relation(
+    subject,
+    relation,
+    object,
+    confidence=1.0,
+    source="user"
+):
+    memory = load_memory()
+
+    memory["knowledge"].append({
+        "subject": subject,
+        "relation": relation,
+        "object": object,
+        "confidence": confidence,
+        "source": source
+    })
+
+    save_memory(memory)
