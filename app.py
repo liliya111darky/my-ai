@@ -1,10 +1,5 @@
 import streamlit as st
 
-from memory import (
-    add_relation,
-    find_relations,
-)
-
 from brain.knowledge import (
     add_knowledge,
     find_knowledge,
@@ -12,6 +7,12 @@ from brain.knowledge import (
     find_structured_knowledge,
     find_contradictions,
     find_duplicate,
+)
+
+from brain.relations import (
+    add_relation,
+    find_relations,
+    infer_from_relations,
 )
 
 
@@ -35,11 +36,23 @@ fact = st.text_input(
 )
 
 if st.button("Сохранить знание"):
+
     if subject and fact:
-        add_knowledge(subject, fact)
-        st.success("🟢 Знание сохранено!")
+
+        add_knowledge(
+            subject,
+            fact
+        )
+
+        st.success(
+            "🟢 Знание сохранено!"
+        )
+
     else:
-        st.warning("Введите понятие и факт.")
+
+        st.warning(
+            "Введите понятие и факт."
+        )
 
 
 # ============================================================
@@ -71,7 +84,9 @@ confidence = st.slider(
     step=0.1
 )
 
-if st.button("Сохранить структурированное знание"):
+if st.button(
+    "Сохранить структурированное знание"
+):
 
     if (
         structured_subject
@@ -86,6 +101,7 @@ if st.button("Сохранить структурированное знание
         )
 
         if duplicate:
+
             st.warning(
                 "🟡 Это знание уже есть в моей памяти."
             )
@@ -174,7 +190,9 @@ relation_confidence = st.slider(
     key="relation_confidence"
 )
 
-if st.button("Сохранить связь"):
+if st.button(
+    "Сохранить связь"
+):
 
     if (
         relation_subject
@@ -211,7 +229,9 @@ search_subject = st.text_input(
     key="search_subject"
 )
 
-if st.button("Найти"):
+if st.button(
+    "Найти"
+):
 
     if search_subject:
 
@@ -227,10 +247,15 @@ if st.button("Найти"):
             search_subject
         )
 
+        inferred_results = infer_from_relations(
+            search_subject
+        )
+
         if (
             not simple_results
             and not structured_results
             and not relation_results
+            and not inferred_results
         ):
 
             st.info(
@@ -238,6 +263,10 @@ if st.button("Найти"):
             )
 
         else:
+
+            # ------------------------------------------------
+            # ПРОСТЫЕ ЗНАНИЯ
+            # ------------------------------------------------
 
             if simple_results:
 
@@ -251,6 +280,10 @@ if st.button("Найти"):
                         f"**{item['subject']}** → "
                         f"{item['fact']}"
                     )
+
+            # ------------------------------------------------
+            # СТРУКТУРИРОВАННЫЕ ЗНАНИЯ
+            # ------------------------------------------------
 
             if structured_results:
 
@@ -268,6 +301,10 @@ if st.button("Найти"):
                         f"{item.get('confidence', 1.0)})"
                     )
 
+            # ------------------------------------------------
+            # СОХРАНЁННЫЕ СВЯЗИ
+            # ------------------------------------------------
+
             if relation_results:
 
                 st.subheader(
@@ -282,6 +319,27 @@ if st.button("Найти"):
                         f"{item['object']} "
                         f"(уверенность: "
                         f"{item.get('confidence', 1.0)})"
+                    )
+
+            # ------------------------------------------------
+            # ВЫВЕДЕННЫЕ СВЯЗИ
+            # ------------------------------------------------
+
+            if inferred_results:
+
+                st.subheader(
+                    "🧠 Выводы"
+                )
+
+                for item in inferred_results:
+
+                    st.write(
+                        f"**{item['subject']}** → "
+                        f"{item['relation']} → "
+                        f"{item['object']} "
+                        f"(через: {item['via']}, "
+                        f"уверенность: "
+                        f"{item['confidence']})"
                     )
 
     else:
