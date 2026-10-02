@@ -30,14 +30,50 @@ def find_relations(subject):
     results = []
 
     for item in memory["knowledge"]:
+
         if (
-            item.get("subject", "").lower() == subject.lower()
+            item.get("subject", "").lower()
+            == subject.lower()
             and "relation" in item
             and "object" in item
         ):
             results.append(item)
 
     return results
+
+
+def delete_relation(
+    subject,
+    relation,
+    object
+):
+    memory = load_memory()
+
+    new_knowledge = []
+
+    deleted = False
+
+    for item in memory["knowledge"]:
+
+        if (
+            item.get("subject", "").lower()
+            == subject.lower()
+            and item.get("relation", "").lower()
+            == relation.lower()
+            and item.get("object", "").lower()
+            == object.lower()
+        ):
+            deleted = True
+            continue
+
+        new_knowledge.append(item)
+
+    memory["knowledge"] = new_knowledge
+
+    if deleted:
+        save_memory(memory)
+
+    return deleted
 
 
 def infer_from_relations(subject):
@@ -76,8 +112,14 @@ def infer_from_relations(subject):
                     "object": second["object"],
                     "via": middle_object,
                     "confidence": min(
-                        first.get("confidence", 1.0),
-                        second.get("confidence", 1.0)
+                        first.get(
+                            "confidence",
+                            1.0
+                        ),
+                        second.get(
+                            "confidence",
+                            1.0
+                        )
                     )
                 })
 
