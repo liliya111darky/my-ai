@@ -38,6 +38,13 @@
       "object": "C",
       "confidence": 1.0,
       "source": "user"
+    },
+    {
+      "subject": "C",
+      "relation": "связано с",
+      "object": "D",
+      "confidence": 1.0,
+      "source": "user"
     }
   ]
 }
