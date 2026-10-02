@@ -200,3 +200,21 @@ def find_contradictions(
                 contradictions.append(item)
 
     return contradictions
+
+
+def find_duplicate(
+    subject,
+    property,
+    value
+):
+    memory = load_memory()
+
+    for item in memory["knowledge"]:
+        if (
+            item.get("subject", "").lower() == subject.lower()
+            and item.get("property", "").lower() == property.lower()
+            and item.get("value", "").lower() == value.lower()
+        ):
+            return item
+
+    return None
