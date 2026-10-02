@@ -179,3 +179,24 @@ def find_relations(subject):
             results.append(item)
 
     return results
+
+
+def find_contradictions(
+    subject,
+    property,
+    value
+):
+    memory = load_memory()
+
+    contradictions = []
+
+    for item in memory["knowledge"]:
+        if (
+            item.get("subject", "").lower() == subject.lower()
+            and item.get("property", "").lower() == property.lower()
+            and "value" in item
+        ):
+            if item["value"].lower() != value.lower():
+                contradictions.append(item)
+
+    return contradictions
