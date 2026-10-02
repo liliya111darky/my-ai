@@ -6,7 +6,8 @@ from memory import (
     find_structured_knowledge,
     add_relation,
     find_relations,
-    find_contradictions
+    find_contradictions,
+    find_duplicate
 )
 
 
@@ -52,37 +53,59 @@ structured_confidence = st.slider(
 if st.button("🧠 Сохранить структурированное знание"):
     if structured_subject and structured_property and structured_value:
 
-        contradictions = find_contradictions(
+        duplicate = find_duplicate(
             structured_subject,
             structured_property,
             structured_value
         )
 
-        if contradictions:
-            st.warning("⚠️ Обнаружено противоречие!")
-
-            for item in contradictions:
-                st.write(
-                    f"В памяти уже есть: "
-                    f"**{item['subject']}** → "
-                    f"{item['property']} → "
-                    f"{item['value']} "
-                    f"(уверенность: {item['confidence']})"
-                )
-
+        if duplicate:
             st.info(
-                "Новое знание не сохранено, "
-                "потому что оно противоречит существующему."
+                "🟡 Это знание уже есть в моей памяти."
+            )
+
+            st.write(
+                f"**{duplicate['subject']}** → "
+                f"{duplicate['property']} → "
+                f"{duplicate['value']} "
+                f"(уверенность: {duplicate['confidence']})"
             )
 
         else:
-            add_structured_knowledge(
+
+            contradictions = find_contradictions(
                 structured_subject,
                 structured_property,
-                structured_value,
-                structured_confidence
+                structured_value
             )
-            st.success("Структурированное знание сохранено!")
+
+            if contradictions:
+                st.warning("🔴 Обнаружено противоречие!")
+
+                for item in contradictions:
+                    st.write(
+                        f"В памяти уже есть: "
+                        f"**{item['subject']}** → "
+                        f"{item['property']} → "
+                        f"{item['value']} "
+                        f"(уверенность: {item['confidence']})"
+                    )
+
+                st.info(
+                    "Новое знание не сохранено, "
+                    "потому что оно противоречит существующему."
+                )
+
+            else:
+                add_structured_knowledge(
+                    structured_subject,
+                    structured_property,
+                    structured_value,
+                    structured_confidence
+                )
+                st.success(
+                    "🟢 Структурированное знание сохранено!"
+                )
 
     else:
         st.warning("Заполни объект, свойство и значение.")
