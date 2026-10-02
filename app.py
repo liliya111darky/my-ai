@@ -3,7 +3,8 @@ from memory import (
     add_knowledge,
     find_knowledge,
     add_structured_knowledge,
-    find_structured_knowledge
+    find_structured_knowledge,
+    add_relation
 )
 
 
@@ -57,6 +58,47 @@ if st.button("🧠 Сохранить структурированное зна�
         st.success("Структурированное знание сохранено!")
     else:
         st.warning("Заполни объект, свойство и значение.")
+
+
+st.divider()
+
+st.subheader("🔗 Связь между знаниями")
+
+relation_subject = st.text_input(
+    "Объект 1",
+    key="relation_subject"
+)
+
+relation_type = st.text_input(
+    "Отношение",
+    key="relation_type"
+)
+
+relation_object = st.text_input(
+    "Объект 2",
+    key="relation_object"
+)
+
+relation_confidence = st.slider(
+    "Уверенность в связи",
+    min_value=0.0,
+    max_value=1.0,
+    value=1.0,
+    step=0.1,
+    key="relation_confidence"
+)
+
+if st.button("🔗 Сохранить связь"):
+    if relation_subject and relation_type and relation_object:
+        add_relation(
+            relation_subject,
+            relation_type,
+            relation_object,
+            relation_confidence
+        )
+        st.success("Связь сохранена в памяти!")
+    else:
+        st.warning("Заполни оба объекта и отношение.")
 
 
 st.divider()
