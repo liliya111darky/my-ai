@@ -1,4 +1,7 @@
-from storage.database import load_memory
+from storage.database import (
+    load_memory,
+    save_memory,
+)
 
 
 def find_direct_relations(subject):
@@ -100,6 +103,43 @@ def build_reasoning_chain(
     return chain_results
 
 
+def save_inference(
+    subject,
+    result,
+    steps,
+    confidence
+):
+    memory = load_memory()
+
+    inference = {
+        "subject": subject,
+        "result": result,
+        "steps": steps,
+        "confidence": confidence,
+        "source": "inference"
+    }
+
+    # Проверяем, не сохранён ли
+    # точно такой же вывод уже раньше.
+
+    for item in memory["reasoning"]:
+
+        if (
+            item.get("subject", "").lower()
+            == subject.lower()
+            and item.get("result", "").lower()
+            == result.lower()
+            and item.get("steps") == steps
+        ):
+            return
+
+    memory["reasoning"].append(
+        inference
+    )
+
+    save_memory(memory)
+
+
 def explain_reasoning(
     subject,
     result
@@ -112,7 +152,10 @@ def explain_reasoning(
 
     for chain in chains:
 
-        if chain["result"].lower() != result.lower():
+        if (
+            chain["result"].lower()
+            != result.lower()
+        ):
             continue
 
         steps = []
