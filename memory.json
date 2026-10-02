@@ -31,6 +31,13 @@
       "object": "B",
       "confidence": 1.0,
       "source": "user"
+    },
+    {
+      "subject": "B",
+      "relation": "связано с",
+      "object": "C",
+      "confidence": 1.0,
+      "source": "user"
     }
   ]
 }
