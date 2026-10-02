@@ -34,7 +34,10 @@ def load_memory():
     )
 
     if response.status_code == 404:
-        return {"knowledge": []}
+        return {
+            "knowledge": [],
+            "reasoning": []
+        }
 
     response.raise_for_status()
 
@@ -46,7 +49,17 @@ def load_memory():
         content
     ).decode("utf-8")
 
-    return json.loads(decoded)
+    memory = json.loads(decoded)
+
+    # Если старый файл ещё не содержит
+    # раздел reasoning — создаём его.
+    if "knowledge" not in memory:
+        memory["knowledge"] = []
+
+    if "reasoning" not in memory:
+        memory["reasoning"] = []
+
+    return memory
 
 
 def save_memory(memory):
@@ -63,6 +76,14 @@ def save_memory(memory):
     file_data = response.json()
 
     sha = file_data["sha"]
+
+    # Гарантируем наличие двух основных
+    # разделов памяти.
+    if "knowledge" not in memory:
+        memory["knowledge"] = []
+
+    if "reasoning" not in memory:
+        memory["reasoning"] = []
 
     content = json.dumps(
         memory,
