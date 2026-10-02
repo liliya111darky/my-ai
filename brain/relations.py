@@ -1,4 +1,4 @@
-from memory import (
+from storage.database import (
     load_memory,
     save_memory,
 )
