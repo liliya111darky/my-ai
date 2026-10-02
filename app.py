@@ -19,6 +19,7 @@ from brain.reasoning import (
     build_reasoning_chain,
     explain_reasoning,
     save_inference,
+    validate_inferences,
 )
 
 
@@ -212,10 +213,6 @@ if st.button(
 
     if search_subject:
 
-        # ----------------------------------
-        # Простые факты
-        # ----------------------------------
-
         simple_results = find_knowledge(
             search_subject
         )
@@ -233,10 +230,6 @@ if st.button(
                     f"{item['fact']}"
                 )
 
-
-        # ----------------------------------
-        # Структурированные знания
-        # ----------------------------------
 
         structured_results = (
             find_structured_knowledge(
@@ -261,10 +254,6 @@ if st.button(
                 )
 
 
-        # ----------------------------------
-        # Прямые связи
-        # ----------------------------------
-
         relation_results = find_relations(
             search_subject
         )
@@ -285,10 +274,6 @@ if st.button(
                     f"{item.get('confidence', 1.0)})"
                 )
 
-
-        # ----------------------------------
-        # Старый механизм вывода
-        # ----------------------------------
 
         inferred_results = (
             infer_from_relations(
@@ -313,10 +298,6 @@ if st.button(
                     f"{item['confidence']})"
                 )
 
-
-        # ----------------------------------
-        # Новый механизм рассуждения
-        # ----------------------------------
 
         reasoning_results = (
             build_reasoning_chain(
@@ -354,10 +335,6 @@ if st.button(
                         f"{step['object']}"
                     )
 
-                # Сохраняем только выводы,
-                # которые действительно получены
-                # через несколько шагов.
-
                 if len(chain["path"]) >= 2:
 
                     steps = []
@@ -389,3 +366,59 @@ if st.button(
             st.info(
                 "Я пока ничего не нашёл."
             )
+
+
+# ==========================================
+# 🩺 ПРОВЕРКА ВЫВОДОВ
+# ==========================================
+
+st.header(
+    "🩺 Проверка собственных выводов"
+)
+
+if st.button(
+    "Проверить выводы",
+    key="validate_reasoning"
+):
+
+    results = validate_inferences()
+
+    if not results:
+
+        st.info(
+            "Сохранённых выводов пока нет."
+        )
+
+    else:
+
+        for item in results:
+
+            status = item.get(
+                "status",
+                "unknown"
+            )
+
+            if status == "valid":
+
+                st.success(
+                    f"🟢 {item['subject']} "
+                    f"→ {item['result']} — "
+                    f"вывод действителен."
+                )
+
+            elif status == "invalid":
+
+                st.error(
+                    f"🔴 {item['subject']} "
+                    f"→ {item['result']} — "
+                    f"основание вывода "
+                    f"больше не найдено."
+                )
+
+            else:
+
+                st.warning(
+                    f"🟡 {item['subject']} "
+                    f"→ {item['result']} — "
+                    f"статус неизвестен."
+                )
