@@ -46,5 +46,17 @@
       "confidence": 1.0,
       "source": "user"
     }
+  ],
+  "reasoning": [
+    {
+      "subject": "A",
+      "result": "C",
+      "steps": [
+        "A → связано с → B",
+        "B → связано с → C"
+      ],
+      "confidence": 1.0,
+      "source": "inference"
+    }
   ]
 }
