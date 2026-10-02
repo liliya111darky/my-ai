@@ -116,11 +116,9 @@ def save_inference(
         "result": result,
         "steps": steps,
         "confidence": confidence,
-        "source": "inference"
+        "source": "inference",
+        "status": "valid"
     }
-
-    # Проверяем, не сохранён ли
-    # точно такой же вывод уже раньше.
 
     for item in memory["reasoning"]:
 
@@ -138,6 +136,70 @@ def save_inference(
     )
 
     save_memory(memory)
+
+
+def validate_inferences():
+    memory = load_memory()
+
+    changed = False
+
+    for inference in memory["reasoning"]:
+
+        steps = inference.get(
+            "steps",
+            []
+        )
+
+        valid = True
+
+        for step_text in steps:
+
+            parts = step_text.split(
+                " → "
+            )
+
+            if len(parts) != 3:
+                valid = False
+                break
+
+            step_subject = parts[0]
+            step_relation = parts[1]
+            step_object = parts[2]
+
+            found = False
+
+            for knowledge in memory["knowledge"]:
+
+                if (
+                    knowledge.get("subject", "").lower()
+                    == step_subject.lower()
+                    and knowledge.get("relation", "").lower()
+                    == step_relation.lower()
+                    and knowledge.get("object", "").lower()
+                    == step_object.lower()
+                ):
+                    found = True
+                    break
+
+            if not found:
+                valid = False
+                break
+
+        new_status = (
+            "valid"
+            if valid
+            else "invalid"
+        )
+
+        if inference.get("status") != new_status:
+
+            inference["status"] = new_status
+            changed = True
+
+    if changed:
+        save_memory(memory)
+
+    return memory["reasoning"]
 
 
 def explain_reasoning(
