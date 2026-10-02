@@ -4,7 +4,8 @@ from memory import (
     find_knowledge,
     add_structured_knowledge,
     find_structured_knowledge,
-    add_relation
+    add_relation,
+    find_relations
 )
 
 
@@ -111,6 +112,7 @@ if st.button("🔍 Найти"):
     if search_subject:
         results = find_knowledge(search_subject)
         structured_results = find_structured_knowledge(search_subject)
+        relation_results = find_relations(search_subject)
 
         if results:
             for item in results:
@@ -128,7 +130,16 @@ if st.button("🔍 Найти"):
                     f"(уверенность: {item['confidence']})"
                 )
 
-        if not results and not structured_results:
+        if relation_results:
+            for item in relation_results:
+                st.write(
+                    f"**{item['subject']}** → "
+                    f"{item['relation']} → "
+                    f"{item['object']} "
+                    f"(уверенность: {item['confidence']})"
+                )
+
+        if not results and not structured_results and not relation_results:
             st.info("Я пока ничего не знаю об этом.")
     else:
         st.warning("Напиши тему для поиска.")
