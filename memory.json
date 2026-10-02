@@ -57,6 +57,17 @@
       ],
       "confidence": 1.0,
       "source": "inference"
+    },
+    {
+      "subject": "A",
+      "result": "D",
+      "steps": [
+        "A → связано с → B",
+        "B → связано с → C",
+        "C → связано с → D"
+      ],
+      "confidence": 1.0,
+      "source": "inference"
     }
   ]
 }
