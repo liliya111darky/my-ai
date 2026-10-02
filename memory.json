@@ -17,6 +17,13 @@
       "object": "2",
       "confidence": 1.0,
       "source": "user"
+    },
+    {
+      "subject": "2",
+      "relation": "является",
+      "object": "натуральным числом",
+      "confidence": 1.0,
+      "source": "user"
     }
   ]
 }
