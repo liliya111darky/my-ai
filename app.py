@@ -1,48 +1,69 @@
 import streamlit as st
+
 from memory import (
+    add_relation,
+    find_relations,
+)
+
+from brain.knowledge import (
     add_knowledge,
     find_knowledge,
     add_structured_knowledge,
     find_structured_knowledge,
-    add_relation,
-    find_relations,
     find_contradictions,
-    find_duplicate
+    find_duplicate,
 )
 
 
-st.set_page_config(
-    page_title="My AI",
-    page_icon="🧠",
+st.title("🧠 Мой ИИ")
+
+
+# ============================================================
+# 📚 ПРОСТОЕ ЗНАНИЕ
+# ============================================================
+
+st.header("📚 Память")
+
+subject = st.text_input(
+    "Понятие",
+    key="simple_subject"
 )
 
-st.title("🧠 My AI")
-st.write("Мой собственный искусственный интеллект")
+fact = st.text_input(
+    "Факт",
+    key="simple_fact"
+)
 
-st.divider()
-
-st.subheader("📚 Память")
-
-subject = st.text_input("Тема")
-fact = st.text_area("Что должен запомнить ИИ?")
-
-if st.button("💾 Запомнить"):
+if st.button("Сохранить знание"):
     if subject and fact:
         add_knowledge(subject, fact)
-        st.success("Знание сохранено в памяти!")
+        st.success("🟢 Знание сохранено!")
     else:
-        st.warning("Заполни тему и знание.")
+        st.warning("Введите понятие и факт.")
 
 
-st.divider()
+# ============================================================
+# 🧩 СТРУКТУРИРОВАННОЕ ЗНАНИЕ
+# ============================================================
 
-st.subheader("🧩 Структурированное знание")
+st.header("🧩 Структурированное знание")
 
-structured_subject = st.text_input("Объект")
-structured_property = st.text_input("Свойство")
-structured_value = st.text_input("Значение")
+structured_subject = st.text_input(
+    "Объект",
+    key="structured_subject"
+)
 
-structured_confidence = st.slider(
+structured_property = st.text_input(
+    "Свойство / отношение",
+    key="structured_property"
+)
+
+structured_value = st.text_input(
+    "Значение",
+    key="structured_value"
+)
+
+confidence = st.slider(
     "Уверенность",
     min_value=0.0,
     max_value=1.0,
@@ -50,8 +71,13 @@ structured_confidence = st.slider(
     step=0.1
 )
 
-if st.button("🧠 Сохранить структурированное знание"):
-    if structured_subject and structured_property and structured_value:
+if st.button("Сохранить структурированное знание"):
+
+    if (
+        structured_subject
+        and structured_property
+        and structured_value
+    ):
 
         duplicate = find_duplicate(
             structured_subject,
@@ -60,15 +86,8 @@ if st.button("🧠 Сохранить структурированное зна�
         )
 
         if duplicate:
-            st.info(
+            st.warning(
                 "🟡 Это знание уже есть в моей памяти."
-            )
-
-            st.write(
-                f"**{duplicate['subject']}** → "
-                f"{duplicate['property']} → "
-                f"{duplicate['value']} "
-                f"(уверенность: {duplicate['confidence']})"
             )
 
         else:
@@ -80,49 +99,65 @@ if st.button("🧠 Сохранить структурированное зна�
             )
 
             if contradictions:
-                st.warning("🔴 Обнаружено противоречие!")
+
+                st.error(
+                    "🔴 Обнаружено противоречие!"
+                )
+
+                st.write(
+                    "Существующее знание:"
+                )
 
                 for item in contradictions:
+
                     st.write(
-                        f"В памяти уже есть: "
                         f"**{item['subject']}** → "
                         f"{item['property']} → "
                         f"{item['value']} "
-                        f"(уверенность: {item['confidence']})"
+                        f"(уверенность: "
+                        f"{item.get('confidence', 1.0)})"
                     )
 
                 st.info(
                     "Новое знание не сохранено, "
-                    "потому что оно противоречит существующему."
+                    "потому что оно противоречит "
+                    "существующему."
                 )
 
             else:
+
                 add_structured_knowledge(
                     structured_subject,
                     structured_property,
                     structured_value,
-                    structured_confidence
+                    confidence
                 )
+
                 st.success(
                     "🟢 Структурированное знание сохранено!"
                 )
 
     else:
-        st.warning("Заполни объект, свойство и значение.")
+
+        st.warning(
+            "Заполните все поля."
+        )
 
 
-st.divider()
+# ============================================================
+# 🔗 СВЯЗИ МЕЖДУ ЗНАНИЯМИ
+# ============================================================
 
-st.subheader("🔗 Связь между знаниями")
+st.header("🔗 Связь между знаниями")
 
 relation_subject = st.text_input(
     "Объект 1",
     key="relation_subject"
 )
 
-relation_type = st.text_input(
+relation = st.text_input(
     "Отношение",
-    key="relation_type"
+    key="relation"
 )
 
 relation_object = st.text_input(
@@ -131,7 +166,7 @@ relation_object = st.text_input(
 )
 
 relation_confidence = st.slider(
-    "Уверенность в связи",
+    "Уверенность связи",
     min_value=0.0,
     max_value=1.0,
     value=1.0,
@@ -139,57 +174,118 @@ relation_confidence = st.slider(
     key="relation_confidence"
 )
 
-if st.button("🔗 Сохранить связь"):
-    if relation_subject and relation_type and relation_object:
+if st.button("Сохранить связь"):
+
+    if (
+        relation_subject
+        and relation
+        and relation_object
+    ):
+
         add_relation(
             relation_subject,
-            relation_type,
+            relation,
             relation_object,
             relation_confidence
         )
-        st.success("Связь сохранена в памяти!")
+
+        st.success(
+            "🟢 Связь сохранена!"
+        )
+
     else:
-        st.warning("Заполни оба объекта и отношение.")
+
+        st.warning(
+            "Заполните все поля."
+        )
 
 
-st.divider()
+# ============================================================
+# 🔎 ПОИСК В ПАМЯТИ
+# ============================================================
 
-st.subheader("🔎 Поиск в памяти")
+st.header("🔎 Поиск в памяти")
 
-search_subject = st.text_input("Что найти в памяти?")
+search_subject = st.text_input(
+    "Что найти?",
+    key="search_subject"
+)
 
-if st.button("🔍 Найти"):
+if st.button("Найти"):
+
     if search_subject:
-        results = find_knowledge(search_subject)
-        structured_results = find_structured_knowledge(search_subject)
-        relation_results = find_relations(search_subject)
 
-        if results:
-            for item in results:
-                if "fact" in item:
+        simple_results = find_knowledge(
+            search_subject
+        )
+
+        structured_results = find_structured_knowledge(
+            search_subject
+        )
+
+        relation_results = find_relations(
+            search_subject
+        )
+
+        if (
+            not simple_results
+            and not structured_results
+            and not relation_results
+        ):
+
+            st.info(
+                "Ничего не найдено."
+            )
+
+        else:
+
+            if simple_results:
+
+                st.subheader(
+                    "📚 Простые знания"
+                )
+
+                for item in simple_results:
+
                     st.write(
-                        f"**{item['subject']}** — {item['fact']}"
+                        f"**{item['subject']}** → "
+                        f"{item['fact']}"
                     )
 
-        if structured_results:
-            for item in structured_results:
-                st.write(
-                    f"**{item['subject']}** → "
-                    f"{item['property']} → "
-                    f"{item['value']} "
-                    f"(уверенность: {item['confidence']})"
+            if structured_results:
+
+                st.subheader(
+                    "🧩 Структурированные знания"
                 )
 
-        if relation_results:
-            for item in relation_results:
-                st.write(
-                    f"**{item['subject']}** → "
-                    f"{item['relation']} → "
-                    f"{item['object']} "
-                    f"(уверенность: {item['confidence']})"
+                for item in structured_results:
+
+                    st.write(
+                        f"**{item['subject']}** → "
+                        f"{item['property']} → "
+                        f"{item['value']} "
+                        f"(уверенность: "
+                        f"{item.get('confidence', 1.0)})"
+                    )
+
+            if relation_results:
+
+                st.subheader(
+                    "🔗 Связи"
                 )
 
-        if not results and not structured_results and not relation_results:
-            st.info("Я пока ничего не знаю об этом.")
+                for item in relation_results:
+
+                    st.write(
+                        f"**{item['subject']}** → "
+                        f"{item['relation']} → "
+                        f"{item['object']} "
+                        f"(уверенность: "
+                        f"{item.get('confidence', 1.0)})"
+                    )
+
     else:
-        st.warning("Напиши тему для поиска.")
+
+        st.warning(
+            "Введите понятие для поиска."
+        )
