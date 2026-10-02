@@ -163,3 +163,19 @@ def add_relation(
     })
 
     save_memory(memory)
+
+
+def find_relations(subject):
+    memory = load_memory()
+
+    results = []
+
+    for item in memory["knowledge"]:
+        if (
+            item.get("subject", "").lower() == subject.lower()
+            and "relation" in item
+            and "object" in item
+        ):
+            results.append(item)
+
+    return results
