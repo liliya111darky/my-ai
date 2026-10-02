@@ -56,7 +56,8 @@
         "B → связано с → C"
       ],
       "confidence": 1.0,
-      "source": "inference"
+      "source": "inference",
+      "status": "valid"
     },
     {
       "subject": "A",
@@ -67,7 +68,8 @@
         "C → связано с → D"
       ],
       "confidence": 1.0,
-      "source": "inference"
+      "source": "inference",
+      "status": "valid"
     }
   ]
 }
