@@ -18,6 +18,7 @@ from brain.relations import (
 from brain.reasoning import (
     build_reasoning_chain,
     explain_reasoning,
+    save_inference,
 )
 
 
@@ -351,6 +352,29 @@ if st.button(
                         f"{step['subject']} → "
                         f"{step['relation']} → "
                         f"{step['object']}"
+                    )
+
+                # Сохраняем только выводы,
+                # которые действительно получены
+                # через несколько шагов.
+
+                if len(chain["path"]) >= 2:
+
+                    steps = []
+
+                    for step in chain["path"]:
+
+                        steps.append(
+                            f"{step['subject']} → "
+                            f"{step['relation']} → "
+                            f"{step['object']}"
+                        )
+
+                    save_inference(
+                        subject=search_subject,
+                        result=chain["result"],
+                        steps=steps,
+                        confidence=chain["confidence"]
                     )
 
 
